@@ -1,10 +1,15 @@
-import styled from "styled-components";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
-import Announcements from "../components/Announcements";
 import { Add, Remove } from "@mui/icons-material";
+import styled from "styled-components";
+import Announcements from "../components/Announcements";
+import Footer from "../components/Footer";
+import Navbar from "../components/Navbar";
 import Newsletter from "../components/Newsletter";
 import { mobile } from "../responsive";
+import { useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { publicRequest } from "../requestMethods";
+import { addProduct } from "../redux/cartRedux";
+import { useDispatch } from "react-redux";
 
 const Container = styled.div``;
 
@@ -22,7 +27,7 @@ const Image = styled.img`
   width: 100%;
   height: 90vh;
   object-fit: cover;
-  ${mobile({ height: "50vh" })}
+  ${mobile({ height: "40vh" })}
 `;
 
 const InfoContainer = styled.div`
@@ -115,54 +120,71 @@ const Button = styled.button`
 `;
 
 const Product = () => {
+  const location = useLocation();
+  const id = location.pathname.split("/")[2];
+  const [product, setProduct] = useState({});
+  const [quantity, setQuantity] = useState(1);
+  const [color, setColor] = useState("");
+  const [size, setSize] = useState("");
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const getProduct = async () => {
+      try {
+        const res = await publicRequest.get("/products/find/" + id);
+        setProduct(res.data);
+      } catch {}
+    };
+    getProduct();
+  }, [id]);
+
+  const handleQuantity = (type) => {
+    if (type === "dec") {
+      quantity > 1 && setQuantity(quantity - 1);
+    } else {
+      setQuantity(quantity + 1);
+    }
+  };
+
+  const handleClick = () => {
+    //redux action
+    dispatch(addProduct({ ...product, quantity, color, size }));
+  };
   return (
     <Container>
       <Navbar />
       <Announcements />
       <Wrapper>
         <ImgContainer>
-          <Image src="https://www.prada.com/content/dam/pradanux_products/S/SGB/SGB296/1XYWF0024/SGB296_1XYW_F0024_S_192_MDF.png/_jcr_content/renditions/cq5dam.web.white.800.1000.webp" />
+          <Image src={product.img} />
         </ImgContainer>
         <InfoContainer>
-          <Title>WOM. X PRADA POLYESTER JACKET</Title>
-          <Desc>
-            Extremely light and soft to the touch, this jacket is made of Light
-            Polyester, a compact and light waterproof fabric made with very fine
-            microfiber yarns produced from recycled plastic materials. Full of
-            technical details such as waxed zippers and a elasticized
-            drawstring, the design is characterized by its straight regular fit
-            and decorated with the distinctive Prada Linea Rossa latex rubber
-            logo badge. Graphene® padding favors the regulation of body
-            temperature: In hot weather, the heat is dispersed while in cold
-            weather, the heat is evenly distributed to stabilize the body
-            temperature.
-          </Desc>
-          <Price>$ 250</Price>
+          <Title>{product.title}</Title>
+          <Desc>{product.description}</Desc>
+          <Price>$ {product.price}</Price>
           <FilterContainer>
             <Filter>
               <FilterTitle>Color</FilterTitle>
-              <FilterColor color="black" />
-              <FilterColor color="darkblue" />
-              <FilterColor color="gray" />
+              {product.color?.map((c) => (
+                <FilterColor color={c} key={c} onClick={() => setColor(c)} />
+              ))}
             </Filter>
             <Filter>
               <FilterTitle>Size</FilterTitle>
-              <FilterSize>
-                <FilterSizeOption>XS</FilterSizeOption>
-                <FilterSizeOption>S</FilterSizeOption>
-                <FilterSizeOption>M</FilterSizeOption>
-                <FilterSizeOption>L</FilterSizeOption>
-                <FilterSizeOption>XL</FilterSizeOption>
+              <FilterSize onChange={(e) => setSize(e.target.value)}>
+                {product.size?.map((s) => (
+                  <FilterSizeOption key={s}>{s}</FilterSizeOption>
+                ))}
               </FilterSize>
             </Filter>
           </FilterContainer>
           <AddContainer>
             <AmountContainer>
-              <Remove />
-              <Amount>1</Amount>
-              <Add />
+              <Remove onClick={() => handleQuantity("dec")} />
+              <Amount>{quantity}</Amount>
+              <Add onClick={() => handleQuantity("inc")} />
             </AmountContainer>
-            <Button>ADD TO CART</Button>
+            <Button onClick={handleClick}>ADD TO CART</Button>
           </AddContainer>
         </InfoContainer>
       </Wrapper>
