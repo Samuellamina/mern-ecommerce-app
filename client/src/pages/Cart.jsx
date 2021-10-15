@@ -5,6 +5,7 @@ import Announcements from "../components/Announcements";
 import { Add, Remove } from "@mui/icons-material";
 import { mobile } from "../responsive";
 import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 
 const Container = styled.div``;
 
@@ -164,7 +165,10 @@ const Cart = () => {
       <Wrapper>
         <Title>Your Cart</Title>
         <Top>
-          <TopButton>CONTINUE SHOPPING</TopButton>
+          <Link to="/products/all">
+            <TopButton>CONTINUE SHOPPING</TopButton>
+          </Link>
+
           <TopTexts>
             <TopText>Shopping Bag ({cart.quantity})</TopText>
             <TopText>Your Wishlist (0)</TopText>

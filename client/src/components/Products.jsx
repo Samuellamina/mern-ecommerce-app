@@ -3,7 +3,6 @@ import { popularProducts } from "../data";
 import Product from "./Product";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { SliderValueLabel } from "@mui/material";
 
 const Container = styled.div`
   padding: 20px;
@@ -24,9 +23,7 @@ const Products = ({ cat, filters, sort }) => {
             : "http://localhost:4000/api/products"
         );
         setProducts(res.data);
-      } catch (err) {
-        console.log(err);
-      }
+      } catch (err) {}
     };
     getProducts();
   }, [cat]);

@@ -10,9 +10,10 @@ import {
   Redirect,
 } from "react-router-dom";
 import ProductList from "./pages/ProductList";
+import { useSelector } from "react-redux";
 
 const App = () => {
-  const user = true;
+  const user = useSelector((state) => state.user.currentUser);
 
   return (
     <Router>
@@ -34,7 +35,7 @@ const App = () => {
           <Login />
         </Route>
         <Route path="/register">
-          <Register />
+          {user ? <Redirect to="/" /> : <Register />}
         </Route>
       </Switch>
     </Router>
